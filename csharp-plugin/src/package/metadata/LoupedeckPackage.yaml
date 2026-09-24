@@ -1,0 +1,28 @@
+# Package type. Must be plugin4 for plugins.
+type: plugin4
+
+# Name that identifies the plugin. The plugin class must be named <name>Plugin.
+name: GoogleMeet
+
+# Plugin name that is shown to the user.
+displayName: Google Meet (C#)
+
+description: Control Google Meet in Chrome from your Logitech device. Mute, camera, raise hand, reactions, chat, captions and more, with live mic/camera/hand state on the keys. Requires the "Meet Control for Logitech" browser extension.
+
+pluginFileName: GoogleMeetPlugin.dll
+
+version: 0.1.0
+
+author: Zikora Collins
+
+minimumLoupedeckVersion: 6.0
+
+# Location of plugin files (relative to the plugin base directory).
+pluginFolderWin: bin
+pluginFolderMac: bin
+
+supportedDevices:
+    # Loupedeck CT, Live, Live S, Razer Stream Controller (X).
+    - LoupedeckCtFamily
+    # Logitech MX Creative Console (Keypad + Dialpad).
+    - LoupedeckExtendedFamily

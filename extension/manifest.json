@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Meet Control for Logitech",
+  "version": "0.1.0",
+  "description": "Lets the Google Meet plugins for Logitech devices mute, toggle camera, react and more in your Meet tab.",
+  "minimum_chrome_version": "120",
+  "permissions": ["scripting", "alarms"],
+  "host_permissions": ["https://meet.google.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://meet.google.com/*"],
+      "js": ["meet-dom.js", "content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

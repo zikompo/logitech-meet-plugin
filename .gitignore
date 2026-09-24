@@ -1,0 +1,14 @@
+# Node plugin
+node_modules/
+dist/
+*.lplug4
+
+# C# plugin
+csharp-plugin/bin/
+csharp-plugin/obj/
+.vs/
+*.user
+
+# OS / editors
+.DS_Store
+.idea/
