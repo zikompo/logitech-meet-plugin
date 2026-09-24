@@ -8,7 +8,19 @@
     !!el && el.isConnected && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
 
   const allButtons = () => document.querySelectorAll('button, [role="button"]');
-  const label = (el) => (el.getAttribute('aria-label') || '').trim().toLowerCase();
+  // Accessible name: aria-label, or the text of the elements named by aria-labelledby.
+  const label = (el) => {
+    const direct = el.getAttribute('aria-label');
+    if (direct) return direct.trim().toLowerCase();
+    const ids = el.getAttribute('aria-labelledby');
+    if (!ids) return '';
+    return ids
+      .split(/\s+/)
+      .map((id) => document.getElementById(id)?.textContent ?? '')
+      .join(' ')
+      .trim()
+      .toLowerCase();
+  };
 
   const bySelector = (selector) => () =>
     [...document.querySelectorAll(selector)].find(isVisible) || null;
@@ -49,7 +61,11 @@
     hand: byLabelPrefix('raise hand', 'lower hand'),
     captions: byLabelPrefix('turn on captions', 'turn off captions', 'captions'),
     chat: byLabelPrefix('chat with everyone', 'open chat', 'chat'),
-    people: byLabelPrefix('show everyone', 'people', 'participants'),
+    // Since 2026 the People panel opens from the participant avatars at the top right.
+    people: firstOf(
+      bySelector('[role="button"]:has([data-avatar-count])'),
+      byLabelPrefix('people', 'show everyone', 'participants'),
+    ),
     share: byLabelPrefix('share screen', 'present now', 'present'),
     reactionsToggle: byLabelPrefix('send a reaction', 'reactions', 'send reaction'),
   };

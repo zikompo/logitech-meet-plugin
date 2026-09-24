@@ -46,7 +46,7 @@ In Options+, the plugin shows up as **Google Meet (Node)** under *All Actions â†
 
 ## 2b. C# plugin
 
-It needs the .NET 8 SDK:
+It needs the .NET SDK that matches your Logi Plugin Service. Service 6.4+ is built on **.NET 10**, even though Logitech's docs still say .NET 8. If the build fails with `CS1705 ... System.Runtime, Version=10.0.0.0`, the project's `TargetFramework` doesn't match the service.
 
 ```bash
 brew install --cask dotnet-sdk

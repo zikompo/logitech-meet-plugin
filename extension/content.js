@@ -83,7 +83,22 @@
   // --- state reporting -----------------------------------------------------
 
   let lastSent = '';
+  let lastState = null;
   let debounceTimer = null;
+
+  // Meet briefly removes a button while re-rendering it (e.g. raise/lower hand),
+  // which reads as null. During a call, keep the last known value instead so
+  // device keys don't flicker.
+  function stableState() {
+    const state = readState();
+    if (state.inCall && lastState?.inCall) {
+      for (const key of Object.keys(state)) {
+        if (state[key] === null) state[key] = lastState[key];
+      }
+    }
+    lastState = state;
+    return state;
+  }
 
   function post(message) {
     if (!alive()) {
@@ -94,7 +109,7 @@
   }
 
   function reportState(force = false) {
-    const state = readState();
+    const state = stableState();
     const serialized = JSON.stringify(state);
     if (!force && serialized === lastSent) return;
     lastSent = serialized;
@@ -118,13 +133,13 @@
         .then(() => run(msg.command))
         .then(async () => {
           await sleep(200); // let Meet update the DOM before reading state back
-          sendResponse({ ok: true, state: readState() });
+          sendResponse({ ok: true, state: stableState() });
         })
         .catch((err) => sendResponse({ ok: false, error: err.message }));
       return true; // async response
     }
     if (msg?.type === 'get-state') {
-      sendResponse(readState());
+      sendResponse(stableState());
     }
     return false;
   }

@@ -43,10 +43,40 @@ function broadcast(message) {
   for (const ws of sockets.values()) send(ws, message);
 }
 
-function connect(port) {
+function scheduleRetry(port) {
+  clearTimeout(retryTimers.get(port));
+  const delay = backoff.get(port) ?? 1000;
+  backoff.set(port, Math.min(delay * 2, MAX_BACKOFF_MS));
+  retryTimers.set(port, setTimeout(() => connect(port), delay));
+}
+
+// Chrome logs every refused WebSocket to the extension's Errors page, and that
+// can't be caught. A no-cors fetch fails silently instead, so check the plugin
+// is listening before opening a socket. (Its HTTP reply doesn't matter.)
+async function isListening(port) {
+  try {
+    await fetch(`http://127.0.0.1:${port}/`, { mode: 'no-cors', cache: 'no-store' });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const probing = new Set(); // ports with a check in flight
+
+async function connect(port) {
   const current = sockets.get(port);
   if (current && (current.readyState === WebSocket.OPEN || current.readyState === WebSocket.CONNECTING)) return;
+  if (probing.has(port)) return;
   clearTimeout(retryTimers.get(port));
+
+  probing.add(port);
+  const listening = await isListening(port);
+  probing.delete(port);
+  if (!listening) {
+    scheduleRetry(port);
+    return;
+  }
 
   const ws = new WebSocket(`ws://127.0.0.1:${port}`);
   sockets.set(port, ws);
@@ -59,12 +89,10 @@ function connect(port) {
     refreshStates();
   };
   ws.onmessage = (event) => handlePluginMessage(ws, event.data);
-  ws.onerror = () => {}; // onclose follows; the browser already logs the failure
+  ws.onerror = () => {}; // onclose follows
   ws.onclose = () => {
     if (sockets.get(port) === ws) sockets.delete(port);
-    const delay = backoff.get(port) ?? 1000;
-    backoff.set(port, Math.min(delay * 2, MAX_BACKOFF_MS));
-    retryTimers.set(port, setTimeout(() => connect(port), delay));
+    scheduleRetry(port);
   };
 }
 

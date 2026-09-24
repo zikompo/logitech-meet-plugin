@@ -4,7 +4,7 @@ namespace Loupedeck.GoogleMeetPlugin
 
     public class GoogleMeetPlugin : Plugin
     {
-        private PluginStatus? _lastStatus;
+        private Loupedeck.PluginStatus? _lastStatus;
 
         // Meet runs in the browser, so this is a universal plugin with no linked application.
         public override Boolean UsesApplicationApiOnly => true;
@@ -30,7 +30,7 @@ namespace Loupedeck.GoogleMeetPlugin
             {
                 PluginLog.Error(ex, $"Couldn't listen on port {MeetBridge.Port}");
                 this.OnPluginStatusChanged(
-                    PluginStatus.Error,
+                    Loupedeck.PluginStatus.Error,
                     $"Couldn't open local port {MeetBridge.Port}. Another app may be using it; restart Logi Plugin Service.");
                 return;
             }
@@ -47,7 +47,7 @@ namespace Loupedeck.GoogleMeetPlugin
 
         private void UpdateStatus()
         {
-            var status = this.Bridge.IsExtensionConnected ? PluginStatus.Normal : PluginStatus.Warning;
+            var status = this.Bridge.IsExtensionConnected ? Loupedeck.PluginStatus.Normal : Loupedeck.PluginStatus.Warning;
             if (status == this._lastStatus)
             {
                 return;
@@ -55,7 +55,7 @@ namespace Loupedeck.GoogleMeetPlugin
             this._lastStatus = status;
             this.OnPluginStatusChanged(
                 status,
-                status == PluginStatus.Normal ? null : "Open Chrome with the \"Meet Control for Logitech\" extension loaded.");
+                status == Loupedeck.PluginStatus.Normal ? null : "Open Chrome with the \"Meet Control for Logitech\" extension loaded.");
         }
     }
 }
